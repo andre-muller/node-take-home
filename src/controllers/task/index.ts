@@ -9,12 +9,22 @@ import {
   ServiceChangeTaskStatus,
 } from '@/usecases/implementations/task';
 import { handleError } from '@/util/errors/handle-errors';
+import { TaskRepository } from '@/repositories/protocols/task-repository';
+import { TaskListRepository } from '@/repositories/protocols/task-list-repository';
 
 class TaskController {
+  private dbTaskListRepository: TaskListRepository;
+
+  private dbTaskRepository: TaskRepository;
+
+  constructor() {
+    this.dbTaskListRepository = new DbTaskListRepository();
+    this.dbTaskRepository = new DbTaskRepository();
+  }
+
   public async index(req: Request, res: Response) {
     try {
-      const dbTaskRepository = new DbTaskRepository();
-      const serviceListTaskList = new ServiceListTask(dbTaskRepository);
+      const serviceListTaskList = new ServiceListTask(this.dbTaskRepository);
 
       const lists = await serviceListTaskList.list();
 
@@ -26,11 +36,9 @@ class TaskController {
 
   public async store(req: Request, res: Response) {
     try {
-      const dbTaskListRepository = new DbTaskListRepository();
-      const dbTaskRepository = new DbTaskRepository();
       const serviceCreateTask = new ServiceCreateTask(
-        dbTaskRepository,
-        dbTaskListRepository,
+        this.dbTaskRepository,
+        this.dbTaskListRepository,
       );
       const { name, duration, task_list_id, dependency_id } = req.body;
 
@@ -48,11 +56,9 @@ class TaskController {
 
   public async update(req: Request, res: Response) {
     try {
-      const dbTaskListRepository = new DbTaskListRepository();
-      const dbTaskRepository = new DbTaskRepository();
       const serviceCreateTaskList = new ServiceUpdateTask(
-        dbTaskRepository,
-        dbTaskListRepository,
+        this.dbTaskRepository,
+        this.dbTaskListRepository,
       );
       const id = Number(req.params.taskListId);
       const { name, duration } = req.body;
@@ -70,11 +76,9 @@ class TaskController {
 
   public async remove(req: Request, res: Response) {
     try {
-      const dbTaskListRepository = new DbTaskListRepository();
-      const dbTaskRepository = new DbTaskRepository();
       const serviceCreateTaskList = new ServiceDeleteTask(
-        dbTaskRepository,
-        dbTaskListRepository,
+        this.dbTaskRepository,
+        this.dbTaskListRepository,
       );
       const id = Number(req.params.taskListId);
 
@@ -87,11 +91,9 @@ class TaskController {
 
   public async changeStatus(req: Request, res: Response) {
     try {
-      const dbTaskListRepository = new DbTaskListRepository();
-      const dbTaskRepository = new DbTaskRepository();
       const serviceCreateTaskList = new ServiceChangeTaskStatus(
-        dbTaskRepository,
-        dbTaskListRepository,
+        this.dbTaskRepository,
+        this.dbTaskListRepository,
       );
       const id = Number(req.params.taskListId);
       const { status } = req.body;

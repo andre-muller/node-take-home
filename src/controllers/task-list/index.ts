@@ -7,12 +7,20 @@ import {
   ServiceDeleteTaskList,
 } from '@/usecases/implementations/task-list';
 import { handleError } from '@/util/errors/handle-errors';
+import { TaskListRepository } from '@/repositories/protocols/task-list-repository';
 
 class TaskListController {
+  private dbTaskListRepository: TaskListRepository;
+
+  constructor() {
+    this.dbTaskListRepository = new DbTaskListRepository();
+  }
+
   public async index(req: Request, res: Response) {
     try {
-      const dbTaskListRepository = new DbTaskListRepository();
-      const serviceListTaskList = new ServiceListTaskList(dbTaskListRepository);
+      const serviceListTaskList = new ServiceListTaskList(
+        this.dbTaskListRepository,
+      );
 
       const lists = await serviceListTaskList.list();
 
@@ -24,9 +32,8 @@ class TaskListController {
 
   public async store(req: Request, res: Response) {
     try {
-      const dbTaskListRepository = new DbTaskListRepository();
       const serviceCreateTaskList = new ServiceCreateTaskList(
-        dbTaskListRepository,
+        this.dbTaskListRepository,
       );
       const { name, due_date } = req.body;
 
@@ -42,9 +49,8 @@ class TaskListController {
 
   public async update(req: Request, res: Response) {
     try {
-      const dbTaskListRepository = new DbTaskListRepository();
       const serviceCreateTaskList = new ServiceUpdateTaskList(
-        dbTaskListRepository,
+        this.dbTaskListRepository,
       );
       const id = Number(req.params.taskListId);
       const { name, due_date } = req.body;
@@ -62,9 +68,8 @@ class TaskListController {
 
   public async remove(req: Request, res: Response) {
     try {
-      const dbTaskListRepository = new DbTaskListRepository();
       const serviceCreateTaskList = new ServiceDeleteTaskList(
-        dbTaskListRepository,
+        this.dbTaskListRepository,
       );
       const id = Number(req.params.taskListId);
 
